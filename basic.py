@@ -16,6 +16,15 @@ def cordinate():
 x, y = cordinate()
 print('{}, {}'.format(x,y))
 
-# input function
-res = input('input: ')
-print(res)
+# for
+i = 0
+for i in range(3):
+    print(i+1)
+    i+=1
+
+# while
+selected = ''
+while selected != 'y':
+    selected = input('exit?(y/n) ')
+
+print(selected)

@@ -1,5 +1,6 @@
 # define
 myList = [1, 2, 3]
+# myList = list(range(3))
 print(myList)
 
 # update element
@@ -17,7 +18,8 @@ myList.remove(2) # value
 print(myList)
 
 # merge list
-myList2 = [5,6,7]
+# myList2 = [5,6,7]
+myList2 = list(range(5,8))
 myList3 = myList + myList2
 print(myList3)
 
@@ -35,4 +37,4 @@ state = ['a', 'b', 'c']
 for i, ele in enumerate(state):
     print("""{}.'{}'""".format(i+1, ele))
 
-list.clear()
+myList.clear()
