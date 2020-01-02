@@ -1,12 +1,5 @@
-time_str = "21:09:10"
-time_list = time_str.split(':')
-print(time_list)
 
-# join
-time_list = ':'.join(time_list)
-print(time_list)
-
-# slice
+#slice
 list1 = [0,1,2,3,4,5]
 list2 = list1[0:2]
 print(list2) # 0,1
@@ -17,7 +10,7 @@ print(list4)
 list5 = list1[:] # 0,1,2,3,4,5
 print(list5)
 
-# slice step
+#slice step
 myList = list1[0:6:2]
 print(myList)
 myList[1:] = range(10,20) # 특정 범위 치환

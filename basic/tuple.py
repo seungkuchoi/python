@@ -20,6 +20,7 @@ print(c)
 # unpacking
 x, y = c
 print(x, y)
+print('unpacking:', *c)
 
 x, y = y, x # swap
 print(x,y)
