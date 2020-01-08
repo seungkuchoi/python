@@ -19,7 +19,7 @@ print(person)
 
 # inherit
 class Programmer(Person):
-    def __init__(self, name, language, skill):
+    def __init__(self, name = None, language = None, skill = None):
         # super: call base class method
         # call base class constructor
         super().__init__(name, language)

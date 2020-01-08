@@ -41,4 +41,6 @@ print(time_list)
 print('*'*3) # ***
 print([1,2]*3) # [1,2,1,2,1,2]
 
-#itertools
+#가장 큰 수 inf
+max_val = float('inf')
+min_val = float('-inf')
