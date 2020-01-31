@@ -1,4 +1,4 @@
 {
-    "viewType" : "Monthly",
-    "firstWeekDay" : "MONDAY"
+    "viewType" : "monthly",
+    "firstWeekday" : "sunday"
 }
