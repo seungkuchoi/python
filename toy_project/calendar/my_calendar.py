@@ -5,6 +5,8 @@ from PyQt5.QtCore import Qt
 from datetime import datetime
 from calendar import Calendar
 
+from functools import partial
+
 class UserData():
     """
     This class is responsible for extracting user data from 'setting.json'
@@ -13,7 +15,7 @@ class UserData():
         import json
         with open(user_file) as file:
             self._json_object = json.load(file)
-            self.view_type = self._json_object["viewType"]
+            self.date_type = self._json_object["viewType"]
             self.first_weekday = self._get_weekday_index()
 
     def _get_weekday_index(self):
@@ -26,11 +28,9 @@ class UserData():
     def write(self, key, value):
         self._json_object[key] = value
 
-user_data = UserData('settings.json')
-
 class DateInfo(Calendar):
-    def __init__(self):
-        self.setfirstweekday(user_data.first_weekday)
+    def __init__(self, first_weekday = 0):
+        self.setfirstweekday(first_weekday)
 
         today = datetime.today()
         self.year = today.year
@@ -38,17 +38,12 @@ class DateInfo(Calendar):
         self.day = today.day
         self.week = today.isocalendar()[1] % 5
 
-    def get_dates(self):
-        if user_data.view_type == 'monthly':
+    def get_dates(self, date_type):
+        self.date_type = date_type
+        if date_type == 'monthly':
             return self.monthdatescalendar(self.year, self.month)
         else:
             return self.monthdatescalendar(self.year, self.month)[self.week]
-
-    def show(self):
-        print(self.get_dates())
-
-date_info = DateInfo()
-#date_info.show()
 
 class Scheduler(QWidget):
     def __init__(self):
@@ -62,6 +57,8 @@ class Scheduler(QWidget):
 
 class MyCalendar(QWidget):
     def __init__(self):
+        self.user_data = UserData('settings.json')
+        self.date_info = DateInfo(self.user_data.first_weekday)
         self.scheduler = Scheduler()
         QWidget.__init__(self, flags=Qt.Widget)
         self.init_widget()
@@ -71,15 +68,17 @@ class MyCalendar(QWidget):
         layout = QGridLayout()
         self.setLayout(layout)
 
-        row = 5
-        col = 7
+        col, row = 7, 5
+        if self.user_data.date_type == 'weekly':
+            row = 1
 
         for x in range(0, row):
-            for y in range(0,col):
-                date_button = QPushButton(str(date_info.get_dates()[x][y].day), self)
-                date_button.clicked.connect(self.show_scheduler)
+            for y in range(0, col):
+                day = self.date_info.get_dates(self.user_data.date_type)[x][y].day
+                date_button = QPushButton(str(day), self)
+                date_button.clicked.connect(partial(self.show_scheduler, date_button))
                 layout.addWidget(date_button, x, y)
 
-    def show_scheduler(self):
+    def show_scheduler(self, button):
+        button.setStyleSheet("background-color: red")
         self.scheduler.show()
-
