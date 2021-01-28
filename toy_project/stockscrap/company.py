@@ -49,7 +49,7 @@ class Company():
         finally:
             self.info = self.parseInfo()
             self.price = self.parsePrice()
-            self.consensus = self.parConsensus()
+            self.consensus = self.parseConsensus()
 
     def __str__(self):
         '''print(stock_info)'''
@@ -59,6 +59,7 @@ class Company():
         info = {'name':'', 'code':'', 'market':''}
         try:
             wrap_company = self.bs_obj.find('div', {'class':'wrap_company'})
+
             name = wrap_company.find('h2')
 
             description = wrap_company.find('div', {'class':'description'})
@@ -71,36 +72,55 @@ class Company():
 
     # 한번 이상 호출되면 parse 다른 곳으로 이동
     def parsePrice(self, item=None):
-        price = {'close':0,'diff_prev':0,'rate_prev':0}
+        price = {'price':0, 'diff_prev':0, 'rate_prev':0}
         try:
-            price_info = self.bs_obj.find('div', {'class':'rate_info'})
+            rate_info = self.bs_obj.find('div', {'class':'rate_info'})
 
-            today = price_info.find('p', {'class':'no_today'})
-            close = today.find('span', {'class':'blind'}) #종가
+            no_today = rate_info.find('p', {'class':'no_today'})
+            price = no_today.find('span', {'class':'blind'}) #종가
 
-            yesterday = price_info.find('p', {'class':'no_exday'}).findAll('em')
-            diff_prev = yesterday[0].find('span', {'class':'blind'}) #전일비
-            rate_prev = yesterday[1].find('span', {'class':'blind'}) #전일비%
+            no_exday = rate_info.find('p', {'class':'no_exday'}).findAll('em')
+            diff_prev = no_exday[0].find('span', {'class':'blind'}) #전일비
+            rate_prev = no_exday[1].find('span', {'class':'blind'}) #전일비%
             
             up_down = '+'
-            if yesterday[0].find('span', {'class':'ico down'}):
+            if no_exday[0].find('span', {'class':'ico down'}):
                 up_down = '-'
 
-            price = {'close':num(close.text),
+            price = {'price':num(price.text),
                     'diff_prev':num(up_down + diff_prev.text),
                     'rate_prev':num(up_down + rate_prev.text)}
         finally:
             return price
 
-    def parConsensus(self): #투자 정보
-        consensus = {'invest_opinion':0, 'target_price':0}
+    def parseConsensus(self): #투자 정보
+        consensus = {'invest_opinion':0, 'target_price':0,
+                'per':0, 'eps':0, 'cns_per':0, 'cns_eps':0, 'pbr':0, 'bps':0}
         try:
-            invest_info = self.bs_obj.find('div', {'class':'aside_invest_info'})
-            table = invest_info.find('table', {'class':'rwidth'}).findAll('td')
-            invest_opinion = num(table[0].findAll('em')[0].text)
-            target_price = num(table[0].findAll('em')[1].text)
+            aside_invest_info = self.bs_obj.find('div', {'class':'aside_invest_info'})
+            rwidth = aside_invest_info.find('table', {'class':'rwidth'}).findAll('td')
+            invest_opinion = num(rwidth[0].findAll('em')[0].text)
+            target_price = num(rwidth[0].findAll('em')[1].text)
 
-            consensus = {'invest_opinion':invest_opinion, 
-                        'target_price':target_price}
+            per_table = aside_invest_info.find('table', {'class':'per_table'}).findAll('td')
+            per = num(per_table[0].find('em', {'id':'_per'}).text)
+            eps = num(per_table[0].find('em', {'id':'_eps'}).text)
+            cns_per = num(per_table[1].find('em', {'id':'_cns_per'}).text)
+            cns_eps = num(per_table[1].find('em', {'id':'_cns_eps'}).text)
+            pbr = num(per_table[2].findAll('em')[0].text)
+            bps = num(per_table[2].findAll('em')[1].text)
+
+            consensus = {'invest_opinion':invest_opinion, 'target_price':target_price,
+                    'per':per, 'eps':eps, 'cns_per':cns_per, 'cns_eps':cns_eps, 'pbr':pbr, 'bps':bps
+                    }
         finally:
             return consensus
+
+    def investStrategy(self):
+        price = self.price['price']
+        per_eps = self.consensus['cns_per'] * self.consensus['cns_eps']
+        pbr_bps = self.consensus['pbr'] * self.consensus['bps']
+
+        stock_data = {'price': float(price), 'per_eps': per_eps, 'pbr_bps': pbr_bps}
+        sorted_x = sorted(stock_data.items(), key=lambda kv: kv[1])
+        print(sorted_x)
